@@ -1,56 +1,90 @@
-const { createClient } = require('@supabase/supabase-js');
-const fetch = require('node-fetch');
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY
-);
+import fetch from "node-fetch";
+import express from "express";
+const app = express();
+const port = 3000;
 
 // Define your city coordinates
 const CITY = {
-    name: 'Your City',
-    lat: 00.0000,  // Replace with your city's latitude
-    lon: 00.0000   // Replace with your city's longitude
+    name: "delhi-dwarka",
+    lat: 28.597564488447873, // latitude
+    lon: 77.05655435814133, // longitude
 };
 
-async function fetchAQIData() {
-    const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${CITY.lat}&lon=${CITY.lon}&appid=${process.env.OPENWEATHER_API_KEY}`;
+// Define your API key
+app.get("/", async (req, res) => {
+    // const { lat, lon } = req.query;
+    const { lat, lon } = CITY;
+    if (!lat || !lon) {
+        return res
+            .status(400)
+            .json({ error: "Latitude and longitude are required" });
+    }
 
+    const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
 
-        return {
-            city: CITY.name,
-            latitude: CITY.lat,
-            longitude: CITY.lon,
-            aqi: data.list[0].main.aqi  // OpenWeather returns AQI on a scale of 1-5
-        };
+        return res.json(data);
+
+        // return res.json({
+        //     latitude: lat,
+        //     longitude: lon,
+        //     aqi: data.list[0].main.aqi
+        // });
     } catch (error) {
-        console.error('Error fetching AQI data:', error);
-        throw error;
+        console.error("Error fetching AQI data:", error);
+        return res.status(500).json({ error: "Error fetching AQI data" });
     }
-}
-
-async function logAQI() {
-    try {
-        const aqiData = await fetchAQIData();
-        const { error } = await supabase
-            .from('aqi_logs')
-            .insert([aqiData]);
-
-        if (error) {
-            console.error('Error logging AQI:', error);
-        } else {
-            console.log(`Successfully logged AQI for ${CITY.name}`);
-        }
-    } catch (error) {
-        console.error('Error in logAQI:', error);
-    }
-}
-
-// Run the logger
-logAQI().then(() => process.exit(0)).catch(error => {
-    console.error('Fatal error:', error);
-    process.exit(1);
 });
+
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+});
+
+// const supabase = createClient(
+//     process.env.SUPABASE_URL,
+//     process.env.SUPABASE_KEY
+// );
+
+// async function fetchAQIData() {
+//     const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${CITY.lat}&lon=${CITY.lon}&appid=${process.env.OPENWEATHER_API_KEY}`;
+
+//     try {
+//         const response = await fetch(url);
+//         const data = await response.json();
+
+//         return {
+//             city: CITY.name,
+//             latitude: CITY.lat,
+//             longitude: CITY.lon,
+//             aqi: data.list[0].main.aqi  // OpenWeather returns AQI on a scale of 1-5
+//         };
+//     } catch (error) {
+//         console.error('Error fetching AQI data:', error);
+//         throw error;
+//     }
+// }
+
+// async function logAQI() {
+//     try {
+//         const aqiData = await fetchAQIData();
+//         const { error } = await supabase
+//             .from('aqi_logs')
+//             .insert([aqiData]);
+
+//         if (error) {
+//             console.error('Error logging AQI:', error);
+//         } else {
+//             console.log(`Successfully logged AQI for ${CITY.name}`);
+//         }
+//     } catch (error) {
+//         console.error('Error in logAQI:', error);
+//     }
+// }
+
+// // Run the logger
+// logAQI().then(() => process.exit(0)).catch(error => {
+//     console.error('Fatal error:', error);
+//     process.exit(1);
+// });
