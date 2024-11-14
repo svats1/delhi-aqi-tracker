@@ -25,8 +25,6 @@ app.get("/", async (req, res) => {
         const response = await fetch(url);
         const data = await response.json();
 
-        // return res.json(data);
-
         return res.json({
             location: CITY.name,
             latitude: lat,

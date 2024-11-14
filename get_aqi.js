@@ -25,13 +25,21 @@ app.get("/", async (req, res) => {
         const response = await fetch(url);
         const data = await response.json();
 
-        return res.json(data);
-
-        // return res.json({
-        //     latitude: lat,
-        //     longitude: lon,
-        //     aqi: data.list[0].main.aqi
-        // });
+        return res.json({
+            location: CITY.name,
+            latitude: lat,
+            longitude: lon,
+            time: data.list[0].dt,
+            aqi: data.list[0].main.aqi,
+            co: data.list[0].components.co,
+            no: data.list[0].components.no,
+            no2: data.list[0].components.no2,
+            o3: data.list[0].components.o3,
+            so2: data.list[0].components.so2,
+            pm2_5: data.list[0].components.pm2_5,
+            pm10: data.list[0].components.pm10,
+            nh3: data.list[0].components.nh3,
+        });
     } catch (error) {
         console.error("Error fetching AQI data:", error);
         return res.status(500).json({ error: "Error fetching AQI data" });
