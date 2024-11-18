@@ -10,19 +10,15 @@ async function fetchAQIData(city) {
     try {
         const response = await fetch(url);
         const data = await response.json();
-        return {
-            name: city.name,
-            lat: city.lat,
-            lon: city.lon,
-            aqi: data.list[0].main.aqi,
-        };
+        return data;
+        
     } catch (error) {
         console.error("Error fetching AQI data:", error);
         throw error;
     }
 }
 
-const aqiData = await fetchAQIData(city);
-console.log(aqiData);
+// const aqiData = await fetchAQIData(city);
+// console.log(aqiData);
 
 export { fetchAQIData };

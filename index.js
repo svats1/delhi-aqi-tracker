@@ -21,23 +21,6 @@ const city = {
     lon: 77.05655, // longitude
 };
 
-// async function logAQI() {
-//     try {
-//         const aqiData = await fetchAQIData(city);
-//         const { data, error } = await supabase
-//             .from("aqi_logs")
-//             .insert([aqiData]);
-
-//         if (error) {
-//             console.error("Error logging AQI:", error);
-//         } else {
-//             console.log(`Successfully logged AQI for ${city.name}`);
-//         }
-//     } catch (error) {
-//         console.error("Error in logAQI:", error);
-//     }
-// }
-
 // Basic test endpoint
 app.get('/test', (req, res) => {
     console.log('Test endpoint hit');
@@ -78,12 +61,8 @@ app.post('/test-insert', async (req, res) => {
 app.post('/aqi', async (req, res) => {
     try {
         console.log('1. AQI endpoint hit');
-
         // Get weather data
-        const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${city.lat}&lon=${city.lon}&appid=${process.env.OPENWEATHER_API_KEY}`;
-        const response = await fetch(url);
-        const weatherData = await response.json();
-        console.log('2. Weather data received:', weatherData);
+        const weatherData = await fetchAQIData(city);
 
         // Format data for insertion
         const aqiData = {
@@ -92,7 +71,7 @@ app.post('/aqi', async (req, res) => {
             longitude: city.lon,
             aqi: weatherData.list[0].main.aqi
         };
-        console.log('3. Formatted AQI data:', aqiData);
+        console.log('2. Formatted AQI data:', aqiData);
 
         // Insert into Supabase
         const { data, error } = await supabase
@@ -101,14 +80,14 @@ app.post('/aqi', async (req, res) => {
             .select();
 
         if (error) {
-            console.error('4. Insert error:', error);
+            console.error('3. Insert error:', error);
             return res.status(500).json({
                 status: 'error',
                 error: error.message
             });
         }
 
-        console.log('5. Successfully inserted AQI data');
+        console.log('4. Successfully inserted AQI data');
         return res.json({
             status: 'success',
             weather_data: weatherData,
@@ -124,6 +103,23 @@ app.post('/aqi', async (req, res) => {
     }
 });
 
+// async function logAQI() {
+//     try {
+//         const aqiData = await fetchAQIData(city);
+//         const { data, error } = await supabase
+//             .from("aqi_logs")
+//             .insert([aqiData]);
+
+//         if (error) {
+//             console.error("Error logging AQI:", error);
+//         } else {
+//             console.log(`Successfully logged AQI for ${city.name}`);
+//         }
+//     } catch (error) {
+//         console.error("Error in logAQI:", error);
+//     }
+// }
+
 // // Run the logger
 // logAQI().then(() => process.exit(0)).catch(error => {
 //     console.error('Fatal error:', error);
@@ -131,6 +127,6 @@ app.post('/aqi', async (req, res) => {
 // });
 
 // Start server
-// app.listen(port, () => {
-//     console.log(`Server running on port ${port}`);
-// });
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
