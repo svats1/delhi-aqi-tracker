@@ -55,7 +55,7 @@ app.post("/aqi", async (req, res) => {
     }
 });
 
-async function logAQI() {
+app.get("/", async (req, res) => {
     try {
         const aqiData = await fetchAQIData(city);
         const { data, error } = await supabase
@@ -64,13 +64,29 @@ async function logAQI() {
 
         if (error) {
             console.error("Error logging AQI:", error);
+            res.status(500).json({
+                status: "error",
+                error: error.message,
+            });
         } else {
             console.log(`Successfully logged AQI for ${city.name}`);
+            res.json({
+                status: "success",
+                message: `Successfully logged AQI for ${city.name}`,
+                data: aqiData
+            });
         }
     } catch (error) {
         console.error("Error in logAQI:", error);
+        res.status(500).json({
+            status: "error",
+            error: error.message,
+        });
     }
-}
+});
+
+
+// logAQI(city);
 
 // // Run the logger
 // logAQI().then(() => process.exit(0)).catch(error => {
